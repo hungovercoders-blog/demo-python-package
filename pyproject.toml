@@ -7,7 +7,7 @@ authors = [
     { name = "dataGriff", email = "griff182uk@yahoo.co.uk" }
 ]
 requires-python = ">=3.12"
-dependencies = ["typer"]
+dependencies = ["typer","pytest","pytest-cov"]
 
 [project.scripts]
 demo-python-greet = "demo_python_package.cli:app"
