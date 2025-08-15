@@ -1,0 +1,17 @@
+[project]
+name = "demo-python-package"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "dataGriff", email = "griff182uk@yahoo.co.uk" }
+]
+requires-python = ">=3.12"
+dependencies = ["typer"]
+
+[project.scripts]
+demo-python-greet = "demo_python_package.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"
