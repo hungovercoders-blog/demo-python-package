@@ -1,7 +1,12 @@
 {
     "cSpell.words": [
+        "GITUSER",
         "pyproject",
         "pytest",
-        "typer"
+        "pyvenv",
+        "Taskfile",
+        "typer",
+        "vars",
+        "venv"
     ]
 }

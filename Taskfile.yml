@@ -1,0 +1,100 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  GITUSER:
+    sh: git config user.name || echo "Unknown User"
+
+tasks:
+  default:
+    cmds:
+      - echo "Hello {{.GITUSER}}"
+    silent: true
+
+  install:
+    desc: Install dependencies and package
+    sources:
+      - pyproject.toml
+      - uv.lock
+    generates:
+      - .venv/pyvenv.cfg
+    cmds:
+      - uv sync --all-extras --dev
+      - uv pip install -e .
+      - |
+        # Only run the demo CLI when running interactively (prevents hanging in CI/background)
+        if [ -t 1 ]; then
+          uv run demo-python-greet --name "{{.GITUSER}}"
+        else
+          echo "Skipping interactive demo: non-interactive shell detected"
+        fi
+
+  build:
+    desc: Build the package
+    deps: [install]
+    sources:
+      - src/**/*.py
+      - pyproject.toml
+    generates:
+      - dist/*.whl
+      - dist/*.tar.gz
+    cmds:
+      - uv build
+
+  lint:
+    desc: Run linting and build checks
+    deps: [build]
+    sources:
+      - src/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+    cmds:
+      - |
+        # Fail fast if lint hangs: 5 minute timeout
+        timeout 5m uvx ruff check
+      - uvx twine check dist/*
+
+  lint-fix:
+    desc: Run linting and build checks
+    deps: [build]
+    sources:
+      - src/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+    cmds:
+      - |
+        uvx ruff format
+        uvx ruff check --fix
+
+  test:
+    desc: Run tests with coverage (CI mode - output to files)
+    deps: [install]
+    sources:
+      - src/**/*.py
+      - tests/**/*.py
+      - pyproject.toml
+    cmds:
+      - |
+        # Fail tests if they hang: 10 minute timeout. Produce junit and coverage artifacts and capture console output.
+        timeout 10m uv run pytest --junit-xml=pytest-results.xml --cov=src --cov-report=xml --cov-report=term > test_output.txt 2>&1 || { cat test_output.txt; exit 1; }
+      - |
+        if [ -f test_output.txt ]; then
+          echo "📄 Last Test Output (from test_output.txt):"
+          echo "==========================================="
+          cat test_output.txt
+        else
+          echo "❌ No test_output.txt found. Run 'task test' first."
+        fi
+
+  ci:
+    desc: Run full CI pipeline
+    deps: [lint, test]
+    cmds:
+      - echo "✅ CI pipeline completed successfully"
+
+
+
+
+
+
