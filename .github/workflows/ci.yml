@@ -41,7 +41,7 @@ jobs:
 
       - name: Use Taskfile to install deps, lint and build
         run: |
-          task ci-force --verbose
+          task ci --force --verbose
 
       - name: Upload test results
         if: always()
